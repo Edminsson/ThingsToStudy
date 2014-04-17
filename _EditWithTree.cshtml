@@ -1,0 +1,148 @@
+﻿@model Riksarkivet.Web.Applications.MOA.Models.ArkivenhetModel
+
+@{
+    @Html.Partial("_ContentHeader", Model.Header)
+    @Html.Partial("_ButtonContentHeader", Model.Header)
+
+    string rightView = "_Arkivenhet";
+    if (Model.Header.Settings.Sida == Sida.Arkivenhet)
+    {
+        <script type="text/javascript">
+            $(function () {
+                @*MOA.Globals.arkivState = new MOA.ArkivState({
+                    id: '@Model.Arkivenhet.Id',
+                    formId: "arkivenhet-form",
+                    controller: "arkivenhet",
+                    auktReferenskod: '@ViewBag.AuktoritetensReferenskod',
+                    agarGruppUppgifterUrl: '@Url.Action("GetAgargruppUppgifter")',
+                    raderaUrl: '@Url.Action("Radera", new { id = Model.Arkivenhet.Id })',
+                    validateSessionUrl: '@Url.Action("ValidateSession", "Arkivenhet")',
+                    typKod: "@Model.Arkivenhet.TypKod",
+                    tillhorArkivId: "@Model.Arkivenhet.TillhörArkivId",
+                    imagePath: "@Url.Content("~/Content/images/arkivenheter/small/")",
+                    canEdit: @(Model.Arkivenhet.CanEdit ? "true" : "false"),
+                    isNew : @(Model.Arkivenhet.IsNew ? "true" : "false"),
+                    arkivPath:"@Url.Action("Index", "Arkiv", new { id = "" })",
+                    auktoritetPath:"@Url.Action("Index", "person-institution", new { id = "" })",
+                    isCreateArkivMode: @(ViewBag.isCreateArkivMode ? "true" : "false")
+                });*@
+
+                MOA.Globals.arkivenhetUIManager = new MOA.ArkivenhetApp.ArkivenhetAppContainer({
+                    id: '@ViewBag.arkivenhetId',
+                    formId: "arkivenhet-form",
+                    controller: "arkivenhet",
+                    auktReferenskod: '@ViewBag.AuktoritetensReferenskod',
+                    agarGruppUppgifterUrl: '@Url.Action("GetAgargruppUppgifter")',
+                    raderaUrl: '@Url.Action("Radera", new { id = Model.Arkivenhet.Id })',
+                    validateSessionUrl: '@Url.Action("ValidateSession", "Arkivenhet")',
+                    typKod: "@Model.Arkivenhet.TypKod",
+                    tillhorArkivId: "@Model.Arkivenhet.TillhörArkivId",
+                    imagePath: "@Url.Content("~/Content/images/arkivenheter/small/")",
+                    canEdit: @(Model.Arkivenhet.CanEdit ? "true" : "false"),
+                    isNew : @(Model.Arkivenhet.IsNew ? "true" : "false"),
+                    arkivPath:"@Url.Action("Index", "Arkiv", new { id = "" })",
+                    auktoritetPath:"@Url.Action("Index", "person-institution", new { id = "" })",
+                    isCreateArkivMode: @(ViewBag.isCreateArkivMode ? "true" : "false"),
+                    saveButtonSelector: "#spara-arkivenhet"
+                });
+
+            });
+        </script>
+    }
+    if (Model.Header.Settings.Sida == Sida.Inmatningsmall)
+    {
+        rightView = "_Inmatningsmall";
+    }
+    else if (Model.Header.Settings.Sida == Sida.Kartmall)
+    {
+        rightView = "_Kartmall";
+    }
+    else if (Model.Header.Settings.Sida == Sida.Reproduktionsmall)
+    {
+        rightView = "_Reproduktionsmall";
+    }
+    else if (Model.Header.Settings.Sida == Sida.Orderhanteringsmall)
+    {
+        rightView = "_Orderhanteringsmall";
+    }
+
+
+
+    <div id="arkivenhet-splitter" class="">
+        <div>
+            <div class="medium-transparent-white">@Html.Partial("_Tree", Model.Arkivenhet)</div>
+        </div>
+        <div>
+            <div class="arkivenhet-content medium-transparent-white">
+                @Html.Partial(rightView, Model.Arkivenhet)
+            </div>
+        </div>
+    </div>
+
+    @*Html.Telerik().Splitter().Name("MySplitter")
+        .Panes(panes =>
+        {
+            panes.Add()
+                .Collapsible(true)
+                .Size("400px")
+                .MaxSize("600px")
+                .Scrollable(true)
+                .HtmlAttributes(new { @class = "medium-transparent-white" })
+                .Content(Html.Partial("_Tree", Model.Arkivenhet).ToHtmlString());
+
+            panes.Add()
+                .Scrollable(true)
+                .Content(@<div class="arkivenhet-content medium-transparent-white">
+                            @Html.Partial(rightView, Model.Arkivenhet)
+                        </div>);
+        })
+        .ClientEvents(e => e.OnLoad("Splitter_OnLoad"))
+        .ClientEvents(e => e.OnResize("Splitter_OnResize"))
+        .Render();*@
+
+    if (Model.Arkivenhet.CanEdit)
+    {
+        @SessionDialog();
+    }
+
+}
+
+@if (Model.Arkivenhet.CanEdit)
+{
+    @RaderaDialog();
+}
+
+@Html.Partial("_HiddenFields", Model.Arkivenhet) @* Hidden Fields måste komma sist i vyn för att fungera *@
+
+
+@helper SessionDialog()
+{
+    <div id="session-reveal" class="reveal-modal" tabindex="-1">
+        <h1>Hoppsan!</h1>
+        <p>Det verkar som om du försöker redigera samma arkivpost på två ställen!</p>
+        <p>
+            <i>Du måste avbryta ditt arbete här. Kopiera ut den information du behöver spara.</i>
+            <i>Om du inte behöver spara något kan du bara stänga fliken/fönstret och jobba vidare i den andra fliken/fönstret med denna arkivpost.</i>
+        </p>
+        <p>
+            <a id="session-error-avbryt" href="#" class="bttn blue cancel">Avbryt</a>
+        </p>
+    </div>
+}
+@helper RaderaDialog()
+{
+    <div id="radera-reveal" class="reveal-modal" tabindex="-1">
+        <h1>Bekräfta radering</h1>
+        <div class="ui-widget">
+            <div class="ui-state-error ui-corner-all" style="margin:.7em 0">
+                <div class="ui-corner-all" style="padding: 0 .7em;">
+                    <p><span class="ui-icon ui-icon-alert" style="float: left; color: red; margin-right: .3em;"></span> Är du säker på att du vill radera "@Model.Arkivenhet.Kortform"?</p>
+                </div>
+            </div>
+        </div>
+        <div id="radera-buttons" class="dialog-buttons cf">
+            <button id="dialog-radera-button" class="bttn icon red delete" tabindex="1">Radera</button>
+            <button id="dialog-avbryt-button" class="bttn icon blue refresh" tabindex="2">Avbryt</button>
+        </div>
+    </div>
+}
