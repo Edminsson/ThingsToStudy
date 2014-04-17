@@ -1,0 +1,385 @@
+﻿@using Riksarkivet.BusinessClasses.MOA
+@using Riksarkivet.Web.Applications.MOA.Models
+@using Riksarkivet.BusinessClasses.MOA.Domain
+@model Arkivenhet
+@{
+    var arkivenhet = Model as Arkivenhet;
+}
+
+@*@if(!Model.IsPartialAjax)
+    {
+    <script type="text/javascript">
+        $(function () {
+            MOA.init_Arkivenhet({
+                isPartialAjax: @(Model.IsPartialAjax ? "true" : "false"),
+                id: '@Model.Id',
+                auktReferenskod: '@ViewBag.AuktoritetensReferenskod',
+                agarGruppUppgifterUrl: '@Url.Action("GetAgargruppUppgifter")',
+                raderaUrl: '@Url.Action("Radera", new { id = Model.Id })',
+                validateSessionUrl: '@Url.Action("ValidateSession", "Arkivenhet")',
+                typKod: "@Model.TypKod",
+                tillhorArkivId: "@Model.TillhörArkivId",
+                imagePath: "@Url.Content("~/Content/images/arkivenheter/small/")",
+                canEdit: @(Model.CanEdit ? "true" : "false"),
+                id : "@Model.Id",
+                isNew : @(Model.IsNew ? "true" : "false"),
+                arkivPath:"@Url.Action("Index", "Arkiv", new { id = "" })",
+                auktoritetPath:"@Url.Action("Index", "person-institution", new { id = "" })"
+                });
+
+        });
+    </script>
+    }*@
+@*@if(Model.CanEdit){
+            <script type="text/javascript">
+                $(function(){
+                    setTimeout('SetFocusOnFirstFormInputElement()', 500);
+                });
+                function SetFocusOnFirstFormInputElement() {
+                    $("form[id='arkivenhet-form'] input[type!=hidden]:first").focus();
+                }
+       </script>
+    }*@
+<div id="ArkivAccordion" class="accordion-wrapper" ng-controller="ArkivenhetController">
+    <div class="accordion-content">
+        <div class="accordion-header"><div class="label">@ViewBag.Legend</div></div>
+        <div class="accordion-content-part">
+            <div class="col-3">
+                @Html.ÄndradUppdateradAv(arkivenhet.SenastÄndradInfo, arkivenhet.SkapadInfo)
+            </div>
+
+            <div class="cols col-2">
+                <div>
+                    @Html.Label("Referenskod aktuell nivå", new { @for = "Kortreferens" })
+                    @Html.TextBox("Kortreferens", null, new { ng_model = "model.Arkivenhet.ReferenskodAktuellNiva" })
+                    @Html.ValidationMessageFor(m => m.ReferenskodAktuellNiva)
+                </div>
+                <div id="referenskodBas">
+                    <label>Referenskod</label>
+                    <span id="Referenskod" class="display-field">{{model.Arkivenhet.ReferenskodBas}}/<span id="kortref"></span>{{model.Arkivenhet.ReferenskodAktuellNiva}}</span>
+                </div>
+            </div>
+            <div class="postBreakLine">
+
+                <div class="nyInformationsRad arkivenhetTitel">
+                    <div class="innehall">
+                        @Html.Label("Titel", new { @for = "Titel" })
+                        @Html.TextArea("Titel", new { @class = "arkivenhetTitel", rows = 1, ng_model = "model.Arkivenhet.Titel" })
+                        @Html.ValidationMessageFor(m => m.Titel)
+                    </div>
+                </div>
+                <div class="nyInformationsRad">
+                    @Html.Label("Status för visning")
+                    <select ng-model="model.Arkivenhet.ArkivenhetStatus.Id" ng-options="item.Key as item.Value for item in dropdownlistor.arkivstatus"></select>
+                    @*@(Html.DropDownListFor(model => model.ArkivenhetStatus.Id, new SelectList(Model.GetSorteradStatusLista(Model.ArkivenhetStatus.Id, Model.IsNew), "Key", "Value", Model.ArkivenhetStatus.Id), new { id = "ArkivenhetStatusDropDown", @class = "arkivenhetDropBox " }))*@
+                </div>
+            </div>
+            @if (!Model.IsNew)
+            {
+                <div class="nyInformationsRad postBreakLine">
+                    @Html.Partial("_ArkivenhetDatering", Model)
+                </div>
+            }
+            <div class="nyInformationsRad postBreakLine">
+                @Html.LabelFor(m => m.ExtraId, new { @for = "ExtraId" })
+                @Html.TextBox("ExtraId", null, new { ng_model = "model.Arkivenhet.ExtraId" })
+            </div>
+            <div class="nyInformationsRad">
+                @Html.LabelFor(m => m.ForteckningsStatus)
+                <select ng-model="model.Arkivenhet.ForteckningsStatus.Id" ng-options="item.Key as item.Value for item in dropdownlistor.forteckningstatus"></select>
+                @*@(Html.DropDownListFor(model => model.ForteckningsStatus.Id, new SelectList(Model.GetSorteradList(Model.ForteckningsStatus.Id, Model.IsNew), "Key", "Value", Model.ForteckningsStatus.Id), new { @class = "arkivenhetDropBox " }))*@
+            </div>
+            <div class="nyInformationsRad postBreakLine">
+                @Html.LabelFor(m => m.nivaspecifikation)
+                @*@Html.TextBoxFor(m => m.nivaspecifikation)*@
+                @Html.TextBox("nivaspecifikation", null, new { ng_model = "model.Arkivenhet.nivaspecifikation" })
+            </div>
+            <div class="nyInformationsRad">
+                @Html.LabelFor(m => m.ForvaringId)
+                <select class="arkivenhetDropBox" ng-model="model.Arkivenhet.ForvaringId" ng-options="item.Key as item.Value for item in dropdownlistor.forvaring"></select>
+                @*@(Html.DropDownListFor(model => model.ForvaringId, ViewBag.Forvaring as List<SelectListItem>, new { id = "ArkivenhetForvaring", @class = "arkivenhetDropBox " }))*@
+
+            </div>
+            @if (!Model.IsNew)
+            {
+                <div class="nyInformationsRad postBreakLine">
+                    @Html.Partial("_ArkivenhetOmfang", Model)
+                </div>
+            }
+            <div class="nyInformationsRad postBreakLine">
+                @Html.LabelFor(m => m.ArkivenhetTyp)
+                <select ng-model="model.Arkivenhet.ArkivenhetTyp.Id" ng-options="item.Key as item.Value for item in dropdownlistor.arkivenhetstyp"></select>
+                @*@(Html.DropDownListFor(model => model.ArkivenhetTyp.Id, ViewBag.ArkivenhetsTyper as List<SelectListItem>, new { id = "ArkivenhetTypDropDown", @class = "arkivenhetDropBox " }))*@
+
+            </div>
+
+            <div class="nyInformationsRad postBreakLine">
+                @{ var ägargrupper = ViewBag.Ägaregrupper as List<SelectListItem>; }
+                @if (Model.CanEdit && Model.IsTopparkiv)
+                {
+                    @Html.LabelFor(m => m.Agare)
+                    <select ng-model="model.Arkivenhet.Agare" ng-options="item.Key as item.Value for item in guidDropdownlistor.agare" ng-disabled="{{Arkivenhet.IsToppArkiv}}"></select>
+                    @*@(Html.DropDownListFor(model => model.Ägare, ägargrupper, new { id = "AgarGrupperDropDown", @class = "arkivenhetDropBox " }))*@
+                }
+            </div>
+            <div class="nyInformationsRad postBreakLine">
+                @Html.LabelFor(model => model.Arkivinstitution)
+                <span id="Arkivinstitution" class="display-field">
+                    @*@Model.Arkivinstitution*@
+                    {{model.Arkivenhet.Arkivinstitution}}
+                </span>
+            </div>
+            <div id="sortera" class="nyInformationsRad postBreakLine">
+                @Html.LabelFor(model => model.Sortering, "Sortering underordnade arkivenheter")
+                <select ng-model="model.Arkivenhet.Sortering" ng-options="item.Key as item.Value for item in dropdownlistor.sortering"></select>
+                @*@(Html.DropDownListFor(m => m.Sortering, new SelectList(Kodtabeller.Sorteringstyp, "Key", "Value", Model.Sortering == null ? ModelDefaultValues.SortingType.ToString() : Model.Sortering.Value.ToString()), new { @class = "arkivenhetDropBox " }))*@
+            </div>
+
+        </div>
+    </div>
+    <div class="accordion-content">
+        <div class="accordion-header"><div class="label">Innehåll</div></div>
+        <div class="accordion-content-part">
+            <div class="cols col-2">
+                <div class="innehall">
+                    @Html.LabelFor(m => m.Syfte)
+                    <div class="container">
+                        <div class="row">
+                            <div>
+                                @Html.TextArea("Syfte", new { rows = 1, ng_model = "model.Arkivenhet.Syfte" })
+                            </div>
+                            <div class="right">
+                                <img width="12" height="12" class="hjalpIkon" title="@Html.Partial("~/Redaktor/Tooltip/_SyfteOchInnehall.cshtml")" src=@Url.Content("~/Content/images/info.png") alt="Info" />
+                            </div>
+                        </div>
+                    </div>
+                    @Html.LabelFor(m => m.arkivbanm)
+                    <div class="container">
+                        <div class="row">
+                            <div>
+                                @Html.TextArea("arkivbanm", new { rows = 1 , ng_model = "model.Arkivenhet.arkivbanm" })
+                            </div>
+                            <div class="right">
+                                <img width="12" height="12" class="hjalpIkon" title="@Html.Partial("~/Redaktor/Tooltip/_Arkivhistorik.cshtml")" src=@Url.Content("~/Content/images/info.png") alt="Info" />
+                            </div>
+                        </div>
+                    </div>
+                    @Html.LabelFor(m => m.struktur)
+                    <div class="container">
+                        <div class="row">
+                            <div>
+                                @Html.TextArea("struktur", new { rows = 1, ng_model = "model.Arkivenhet.struktur"  })
+                            </div>
+                            <div class="right">
+                                <img width="12" height="12" class="hjalpIkon" title="@Html.Partial("~/Redaktor/Tooltip/_OrdningOchStruktur.cshtml")" src=@Url.Content("~/Content/images/info.png") alt="Info" />
+                            </div>
+                        </div>
+                    </div>
+                    @Html.LabelFor(m => m.allmanm)
+                    <div class="container">
+                        <div class="row">
+                            <div>
+                                @Html.TextArea("allmanm", new { rows = 1, ng_model = "model.Arkivenhet.allmanm" })
+                            </div>
+                            <div class="right">
+                                <img width="12" height="12" class="hjalpIkon" title="@Html.Partial("~/Redaktor/Tooltip/_AllmanAnmarkning.cshtml")" src=@Url.Content("~/Content/images/info.png") alt="Info" />
+                            </div>
+                        </div>
+                    </div>
+                    @Html.LabelFor(m => m.admanm)
+                    <div class="container">
+                        <div class="row">
+                            <div>
+                                @Html.TextArea("admanm", new { rows = 1, ng_model = "model.Arkivenhet.admanm" })
+                            </div>
+                            <div class="right">
+                                <img width="12" height="12" class="hjalpIkon" title="@Html.Partial("~/Redaktor/Tooltip/_InternaAnmarkning.cshtml")" src=@Url.Content("~/Content/images/info.png") alt="Info" />
+                            </div>
+                        </div>
+                    </div>
+                    @Html.LabelFor(m => m.historik)
+                    <div class="container">
+                        <div class="row">
+                            <div>
+                                @Html.TextArea("historik", new { rows = 1, ng_model = "model.Arkivenhet.historik" })
+                            </div>
+                            <div class="right">
+                                <img width="12" height="12" class="hjalpIkon" title="@Html.Partial("~/Redaktor/Tooltip/_InledningAldreForm.cshtml")" src=@Url.Content("~/Content/images/info.png") alt="Info" />
+                            </div>
+                        </div>
+                    </div>
+                    @Html.LabelFor(m => m.kallor)
+                    <div class="container">
+                        <div class="row">
+                            <div>
+                                @Html.TextArea("kallor", new { rows = 1, ng_model = "model.Arkivenhet.kallor" })
+                            </div>
+                            <div class="right">
+                                <img width="12" height="12" class="hjalpIkon" title="@Html.Partial("~/Redaktor/Tooltip/_AnmarkningPostensUpprattande.cshtml")" src=@Url.Content("~/Content/images/info.png") alt="Info" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="accordion-content">
+        <div class="accordion-header">
+            <div class="label">Tillgänglighet</div>
+        </div>
+        <div class="accordion-content-part">
+
+
+            <div class="divTable">
+                <div class="divRow">
+                    <div class="divCell">
+                        @Html.LabelFor(m => m.VillkorId)
+                        <select ng-model="model.Arkivenhet.VillkorId" ng-options="item.Key as item.Value for item in dropdownlistor.villkor" class="arkivenhetDropBox"></select>
+                        @*@(Html.DropDownListFor(model => model.VillkorId, ViewBag.VillkorList as List<SelectListItem>, new { @class = "arkivenhetDropBox " }))*@
+                    </div>
+
+                    <div class="divCell">
+                        @Html.LabelFor(m => m.TillstandsgivareId)
+                        <select ng-model="model.Arkivenhet.TillstandsgivareId" ng-options="item.Key as item.Value for item in dropdownlistor.tgivare" class="arkivenhetDropBox"></select>
+                        @*@(Html.DropDownListFor(model => model.TillstandsgivareId, ViewBag.TillstandsGivareList as List<SelectListItem>, new { @class = "arkivenhetDropBox " }))*@
+                    </div>
+
+                    <div class="divCell">
+                        @Html.LabelFor(m => m.UpphovsrattId)
+                        <select ng-model="model.Arkivenhet.UpphovsrattId" ng-options="item.Key as item.Value for item in dropdownlistor.upphov" class="arkivenhetDropBox"></select>
+                        @*@(Html.DropDownListFor(model => model.UpphovsrattId, ViewBag.UpphovsrattList as List<SelectListItem>, new { @class = "arkivenhetDropBox " }))*@
+                    </div>
+                </div>
+                <div class="divRow">
+                    <div class="divCell">
+                        @Html.LabelFor(m => m.SekretessId)
+                        <select ng-model="model.Arkivenhet.SekretessId" ng-options="item.Key as item.Value for item in dropdownlistor.sekretess" class="arkivenhetDropBox"></select>
+                        @*@(Html.DropDownListFor(model => model.SekretessId, ViewBag.SekretessList as List<SelectListItem>, new { @class = "arkivenhetDropBox " }))*@
+                    </div>
+                    <div class="divCell">
+                        @Html.LabelFor(m => m.PersonuppgiftPULId)
+                        <select ng-model="model.Arkivenhet.PersonuppgiftPULId" ng-options="item.Key as item.Value for item in dropdownlistor.personpul" class="arkivenhetDropBox"></select>
+                        @*@(Html.DropDownListFor(model => model.PersonuppgiftPULId, ViewBag.PersonuppgiftPULList as List<SelectListItem>, new { @class = "arkivenhetDropBox " }))*@
+                    </div>
+                    <div class="divCell">
+                        @Html.LabelFor(m => m.RestriktionerPULId)
+                        <select ng-model="model.Arkivenhet.RestriktionerPULId" ng-options="item.Key as item.Value for item in dropdownlistor.restriktioner" class="arkivenhetDropBox"></select>
+                        @*@(Html.DropDownListFor(model => model.RestriktionerPULId, ViewBag.RestriktionerPULList as List<SelectListItem>, new { @class = "arkivenhetDropBox " }))*@
+                    </div>
+
+                </div>
+                <div class="divRow">
+                    <div class="divCell">
+                        @Html.LabelFor(m => m.PulRegelId)
+                        <select ng-model="model.Arkivenhet.PulRegelId" ng-options="item.Key as item.Value for item in dropdownlistor.pulregel" class="arkivenhetDropBox"></select>
+                        @*@(Html.DropDownListFor(model => model.PulRegelId, ViewBag.PulRegelList as List<SelectListItem>, new { @class = "arkivenhetDropBox " }))*@
+                    </div>
+                    <div class="divCell">
+                        @Html.LabelFor(m => m.DepositionId)
+                        <select ng-model="model.Arkivenhet.DepositionId" ng-options="item.Key as item.Value for item in dropdownlistor.deposition" class="arkivenhetDropBox"></select>
+                        @*@(Html.DropDownListFor(model => model.DepositionId, ViewBag.DepositionList as List<SelectListItem>, new { @class = "arkivenhetDropBox " }))*@
+                    </div>
+                    <div class="divCell">
+                        @Html.LabelFor(m => m.VardbehovId)
+                        <select ng-model="model.Arkivenhet.VardbehovId" ng-options="item.Key as item.Value for item in dropdownlistor.vardbehov" class="arkivenhetDropBox"></select>
+                        @*@(Html.DropDownListFor(model => model.VardbehovId, ViewBag.VardbehovList as List<SelectListItem>, new { @class = "arkivenhetDropBox " }))*@
+                    </div>
+                </div>
+
+                <div class="divRow">
+                    <div class="divCell">
+                        <div class="innehall">
+                            @Html.LabelFor(m => m.VillkorAnmarkning)
+                            @Html.TextArea("VillkorAnmarkning", new { rows = 1, ng_model = "model.Arkivenhet.VillkorAnmarkning" })
+                        </div>
+                    </div>
+                </div>
+                <div class="divRow">
+                    <div class="divCell">
+                        <div class="innehall">
+                            @Html.LabelFor(m => m.FyskiskaTekniskaVillkorAnmarkning)
+                            @Html.TextArea("FyskiskaTekniskaVillkorAnmarkning", new { rows = 1, ng_model = "model.Arkivenhet.FyskiskaTekniskaVillkorAnmarkning" })
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="accordion-content">
+        <div class="accordion-header">
+            <div class="label">Hänvisning till arkivenhet</div>
+            @Html.Partial("_ArkivenhetArkivenhetKnappar", Model)
+        </div>
+        <div class="accordion-content-part grid">
+            @Html.Partial("_ArkivenhetArkivenhet", Model)
+        </div>
+    </div>
+
+    <div class="accordion-content">
+        <div class="accordion-header">
+            <div class="label">Ämnesordshänvisning</div>
+            @Html.Action("GridKnappar", "Arkivenhet", new { gridNamn = "arkivenhetamnesord", canEdit = Model.CanEdit })
+        </div>
+        <div class="accordion-content-part grid">
+            @Html.Action("Grid", "Arkivenhet", new { gridNamn = "arkivenhetamnesord", canEdit = Model.CanEdit })
+        </div>
+    </div>
+
+
+    <div class="accordion-content">
+        <div class="accordion-header">
+            <div class="label">Topografihänvisningar</div>
+            @Html.Action("GridKnappar", "Arkivenhet", new { gridNamn = "arkivenhettopografi", canEdit = Model.CanEdit })
+        </div>
+        <div class="accordion-content-part grid">
+            @Html.Action("Grid", "Arkivenhet", new { gridNamn = "arkivenhettopografi", canEdit = Model.CanEdit })
+        </div>
+    </div>
+
+
+    <div class="accordion-content">
+        <div class="accordion-header">
+            <div class="label">Externa hänvisningar</div>
+            @Html.Action("GridKnappar", "Arkivenhet", new { gridNamn = "arkivenhetextern", canEdit = Model.CanEdit })
+        </div>
+        <div class="accordion-content-part grid">
+            @Html.Action("Grid", "Arkivenhet", new { gridNamn = "arkivenhetextern", canEdit = Model.CanEdit })
+        </div>
+    </div>
+
+    <div class="accordion-content" ng-show="model.Arkivenhet.KanHaAuktoritetshanvisningar">
+        <div class="accordion-header" ng-switch on="model.Arkivenhet.ArkivenhetTyp.Id">
+            <div class="label" ng-switch-when="@KodArkivenhetTyp.Arkiv">Hänvisning till arkivbildare</div>
+            <div class="label" ng-switch-default>Hänvisning till upphovsperson/brevskrivare</div>
+            @Html.Partial("_ArkivenhetAuktoritetKnappar", Model)
+        </div>
+        <div class="accordion-content-part grid">
+            @Html.Partial("_ArkivenhetAuktoritet", Model)
+        </div>
+    </div>
+
+    <div class="accordion-content">
+        <div class="accordion-header">
+            <div class="label">Hänvisning till placering</div>
+            @Html.Action("GridKnappar", "Arkivenhet", new { gridNamn = "arkivenhetplacering", canEdit = Model.CanEdit })
+        </div>
+        <div class="accordion-content-part grid">
+            @Html.Action("Grid", "Arkivenhet", new { gridNamn = "arkivenhetplacering", canEdit = Model.CanEdit })
+        </div>
+    </div>
+
+</div>
+
+@Html.Partial("_HiddenFields", Model)
+
+@*<script type="text/javascript">
+
+        $(document).ready(function () {
+            if (!@(Model.CanEdit ? "true" : "false"))
+                $('fieldset').find('Html.DropDownListFor, input, Label, textarea, select').attr('disabled', true)
+        });
+    </script>*@
